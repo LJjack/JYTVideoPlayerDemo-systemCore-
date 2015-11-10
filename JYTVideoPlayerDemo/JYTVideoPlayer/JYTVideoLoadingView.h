@@ -8,6 +8,12 @@
 
 #import <UIKit/UIKit.h>
 
+typedef enum : NSUInteger {
+    kLoadLarge,
+    kLoadNomal,
+    kLoadnone,
+} kLoadType;
+
 @protocol JYTVideoLoadingViewDelegate <NSObject>
 @optional
 - (void)clickRetry;
@@ -37,6 +43,8 @@
 @property (nonatomic, strong) UIButton * retryBtn;
 
 @property (nonatomic, weak) id<JYTVideoLoadingViewDelegate>  delegate;
+
+-(instancetype)initWithFrame:(CGRect)frame andLoadType:(kLoadType)type;
 
 - (void)showLoading;
 - (void)showRetry:(BOOL)isError;

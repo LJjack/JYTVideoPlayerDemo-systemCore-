@@ -28,6 +28,9 @@
 /**中央提示框*/
 @property (nonatomic,strong) JYTVideoLoadingView * centerView;
 
+/**中央播放按钮*/
+@property (nonatomic,strong) UIButton * centerBtn;
+
 /**刷新UI计时器*/
 @property (nonatomic,strong) NSTimer * videoTimer;
 
@@ -101,11 +104,16 @@
 
 - (JYTVideoLoadingView *)centerView{
     if (!_centerView) {
-        _centerView = [[JYTVideoLoadingView alloc] initWithFrame:CGRectMake(0, 0, 200, 100)];
+        CGRect frame = CGRectMake(0, 0, 200, 100);
+        if (self.videoType == DVideoTypeTeahcherExp) {
+            frame = CGRectMake(0, 0, 150, 75);
+        }
+        kLoadType type = self.videoType == DVideoTypeLesson ? kLoadLarge:kLoadNomal;
+        _centerView = [[JYTVideoLoadingView alloc] initWithFrame:frame andLoadType:type];
         _centerView.center = self.cbPlayerView.center;
         _centerView.hidden = YES;
         _centerView.delegate = self;
-        [self.cbPlayerView insertSubview:_centerView atIndex:2];
+        [self.cbPlayerView addSubview:_centerView];
     }
     return _centerView;
 }
@@ -122,6 +130,8 @@
 /**点击标题按钮*/
 - (void)clickTitleBtn{
     [self stopVideo];
+    if(self.videoType == DVideoTypeLesson)
+        [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationNone];
     if (self.navigationController) {
         [self.navigationController popViewControllerAnimated:YES];
     }
@@ -170,9 +180,17 @@
 }
 
 
+-(void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    if(self.videoType == DVideoTypeLesson)
+        [[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationNone];
+}
+
 #pragma mark - VIEWDIDLOAD
 - (void)viewDidLoad {
     [super viewDidLoad];
+    if(self.videoType == DVideoTypeLesson)
+        [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationSlide];
     if(!CGRectIsEmpty(self.frame)){
         self.view.frame = self.frame;
     }
@@ -184,6 +202,15 @@
     if(self.videoUrl && self.shouldAutoplay){
         [self setUpVideo];
     }
+    if(self.videoType == DVideoTypeTeahcherExp){
+        self.centerBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        [self.cbPlayerView addSubview:self.centerBtn];
+        self.centerBtn.frame = CGRectMake(0, 0, 40, 40);
+        self.centerBtn.center = self.cbPlayerView.center;
+        [self.centerBtn setImage:[UIImage imageNamed:@"movie_bigPlay"] forState:UIControlStateNormal];
+        [self.centerBtn addTarget:self action:@selector(playVideo) forControlEvents:UIControlEventTouchUpInside];
+    }
+
 }
 
 #pragma mark - 百度视频初始化
@@ -195,7 +222,7 @@
     [self stopVideo];
     [self.centerView showLoading];
     if (!self.playerView) {
-        self.playerView = [[JYTPlayerView alloc]initWithFrame:self.view.bounds];
+        self.playerView = [[JYTPlayerView alloc]initWithFrame:self.frame];
         [self.cbPlayerView insertSubview:self.playerView atIndex:1];
     }
     NSURL *url = [NSURL URLWithString:self.videoUrl];
@@ -248,6 +275,7 @@
         if ([playerItem status] == AVPlayerStatusReadyToPlay) {
             NSLog(@"AVPlayerStatusReadyToPlay");
             //            self.stateButton.enabled = YES;
+            [self initVideo];
             CMTime duration = self.playerItem.duration;// 获取视频总长度
             CGFloat totalSecond = playerItem.duration.value / playerItem.duration.timescale;// 转换成秒
             [self refreshProgress:0 totalDuration:totalSecond isDrag:NO];
@@ -442,6 +470,7 @@
 #pragma mark 初始化视频
 - (void)initVideo{
     //初始化视频文件
+    [UIApplication sharedApplication].idleTimerDisabled = YES;
     [self.centerView showLoading];
     self.bottomBar.isPlay = YES;
 }
@@ -456,6 +485,8 @@
 #pragma mark 恢复播放
 - (void)playVideo{
     [self setUpVideo];
+    [UIApplication sharedApplication].idleTimerDisabled = YES;
+    self.centerBtn.hidden = YES;
     if (self.isStoped) {//播放到最后
         [self.playerView.player seekToTime:kCMTimeZero completionHandler:^(BOOL finished) {
         }];
@@ -472,6 +503,7 @@
 
 #pragma mark 停止播放
 - (void)stopVideo{
+    [UIApplication sharedApplication].idleTimerDisabled = NO;
     self.isSetUp = NO;
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     [[_player currentItem] removeObserver:self forKeyPath:@"loadedTimeRanges" context:nil];

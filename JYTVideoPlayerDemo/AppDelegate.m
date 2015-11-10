@@ -21,7 +21,7 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
     self.window.backgroundColor = [UIColor whiteColor];
-    TTXSVideoController * vc = [TTXSVideoController videoControllerWithFrame:CGRectZero andVideoUrl:@"http://58.20.139.24/v.cctv.com/flash/mp4video6/TMS/2011/01/05/cf752b1c12ce452b3040cab2f90bc265_h264818000nero_aac32-1.mp4" andVideoType:DVideoTypeLesson isShouldAutoPlay:YES isLandscape:YES];
+    TTXSVideoController * vc = [TTXSVideoController videoControllerWithFrame:CGRectMake(0, 0, 414, 414 / 16 * 9) andVideoUrl:@"http://58.20.139.24/v.cctv.com/flash/mp4video6/TMS/2011/01/05/cf752b1c12ce452b3040cab2f90bc265_h264818000nero_aac32-1.mp4" andVideoType:DVideoTypeTeahcherExp isShouldAutoPlay:NO isLandscape:NO];
     self.window.rootViewController = vc;
     [self.window makeKeyAndVisible];
     return YES;

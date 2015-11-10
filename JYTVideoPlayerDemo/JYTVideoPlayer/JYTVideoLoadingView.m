@@ -8,6 +8,12 @@
 
 #import "JYTVideoLoadingView.h"
 
+@interface JYTVideoLoadingView ()
+
+@property (nonatomic,assign) kLoadType type;
+
+@end
+
 @implementation JYTVideoLoadingView
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -19,10 +25,21 @@
     return self;
 }
 
+-(instancetype)initWithFrame:(CGRect)frame andLoadType:(kLoadType)type{
+    self.type = type;
+    self = [self initWithFrame:frame];
+    return self;
+}
+
 -(UIActivityIndicatorView *)indicatorView{
     if (!_indicatorView) {
-        _indicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
-        _indicatorView.frame = CGRectMake(40, 10, 44, 44);
+        if (self.type == kLoadNomal) {
+            _indicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+            _indicatorView.frame = CGRectMake(self.frame.size.width / 5, self.frame.size.height / 10, 20, 44);
+        }else{
+            _indicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+            _indicatorView.frame = CGRectMake(self.frame.size.width / 5, self.frame.size.height / 10, 44, 44);
+        }
         [self addSubview:_indicatorView];
     }
     return _indicatorView;
@@ -31,9 +48,13 @@
 - (UILabel *)netWorkLabel{
     if (!_netWorkLabel) {
         _netWorkLabel = [[UILabel alloc] init];
-        _netWorkLabel.frame = CGRectMake(CGRectGetMaxX(self.indicatorView.frame) + 11, 10, 70, 44);
+        _netWorkLabel.frame = CGRectMake(CGRectGetMaxX(self.indicatorView.frame) + self.frame.size.width / 20, self.frame.size.height / 10, self.frame.size.height, 44);
         _netWorkLabel.textColor = [UIColor whiteColor];
-        _netWorkLabel.font = [UIFont systemFontOfSize:16];
+        if (self.type == kLoadLarge) {
+            _netWorkLabel.font = [UIFont systemFontOfSize:16];
+        }else{
+            _netWorkLabel.font = [UIFont systemFontOfSize:12];
+        }
         [self addSubview:_netWorkLabel];
     }
     return _netWorkLabel;
@@ -41,10 +62,19 @@
 
 -(UILabel *)titleLabel{
     if (!_titleLabel) {
-        _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(10, CGRectGetMaxY(self.indicatorView.frame), self.frame.size.width - 20, 40)];
+        NSLog(@"%.f",CGRectGetMaxY(self.indicatorView.frame));
+        if (self.type == kLoadNomal) {
+            _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.frame.size.width / 10, 30, self.frame.size.width - 20, 40)];
+        }else{
+            _titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.frame.size.width / 10, CGRectGetMaxY(self.indicatorView.frame), self.frame.size.width - 20, 40)];
+        }
         _titleLabel.textColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5];
         _titleLabel.textAlignment = NSTextAlignmentCenter;
-        _titleLabel.font = [UIFont systemFontOfSize:17];
+        if (self.type == kLoadLarge) {
+            _titleLabel.font = [UIFont systemFontOfSize:17];
+        }else{
+            _titleLabel.font = [UIFont systemFontOfSize:13];
+        }
         [self addSubview:_titleLabel];
     }
     return _titleLabel;
@@ -69,9 +99,6 @@
 }
 
 - (void)showLoading{
-    
-    [self.superview bringSubviewToFront:self];
-    
     self.hidden = NO;
     self.indicatorView.hidden = NO;
     self.netWorkLabel.hidden = NO;
@@ -81,8 +108,6 @@
 }
 
 - (void)showRetry:(BOOL)isError{
-    
-    [self.superview bringSubviewToFront:self];
     self.hidden = NO;
     self.retryBtn.hidden = NO;
     self.indicatorView.hidden = YES;
@@ -99,7 +124,7 @@
 
 - (void)hide{
     self.hidden = YES;
-
+    
 }
 
 - (void)clickRetry{
