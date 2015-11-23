@@ -1,6 +1,6 @@
 # JYTVideoPlayerDemo
 
-###本工程是对系统播放器的封装（使用方法与JYTVideoPlayerDemo一致，只是播放内核切换为系统的AVFundation）。
+###本工程是对系统播放器的封装（使用方法与JYTVideoPlayerDemo一致，只是播放内核切换为系统的AVFundation）
 
 ####1.创建播放器：
 
